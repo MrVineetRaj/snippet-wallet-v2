@@ -40,7 +40,6 @@
   --radius-xl: calc(0.3rem + 4px);
 }
 
-
 body {
-  @apply bg-background text-foreground;
+  @apply bg-background text-foreground flex flex-col w-screen overflow-x-hidden min-h-[100svh]  items-center;
 }

@@ -14,10 +14,20 @@ import {
   PlatformUserRoles,
 } from "../utils/constants.js";
 
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 const registerUser = asyncHandler(async (req, res) => {
   const { email, password, role, fullname } = req.body;
 
   console.log(req.body, AvailablePlatformUserRoles);
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new ApiError(400, "User already exists", [
+      {
+        email: "User with email already exists",
+      },
+    ]);
+  }
   // const password =
   const user = new User({
     email,
@@ -39,10 +49,11 @@ const registerUser = asyncHandler(async (req, res) => {
     subject: "Email Verification Mail",
     mailGenContent: emailVerificationMailContent(
       fullname,
-      `http://localhost:8080/api/v1/user/verify-email/${unHashedToken}`
+      `${CLIENT_URL}/verify-email/${unHashedToken}`
     ),
   });
 
+  res.cookie(process.env.JWT_NAME, "", CookieOptions);
   res.status(201).json(new ApiResponse(201, user, "Verification Mail Sent"));
 });
 
@@ -52,7 +63,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    throw new ApiError(401, "Not Verified", [
+    throw new ApiError(401, "Invalid credentials", [
       {
         auth: "Invalid credentials",
       },
@@ -62,7 +73,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const isMatch = await user.isPasswordCorrect(password);
 
   if (!isMatch) {
-    throw new ApiError(401, "Not Verified", [
+    throw new ApiError(401, "Invalid credentials", [
       {
         auth: "Invalid credentials",
       },
@@ -138,7 +149,7 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
     subject: "Email Verification Mail",
     mailGenContent: emailVerificationMailContent(
       user.fullname,
-      `http://localhost:8080/api/v1/user/verify-email/${unHashedToken}`
+      `${CLIENT_URL}/verify-email/${unHashedToken}`
     ),
   });
 
@@ -168,7 +179,7 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     subject: "Reset password mail",
     mailGenContent: forgotPasswordMailContent(
       user.username,
-      `http://localhost:8080/api/v1/user/forget-password/${unHashedToken}`
+      `${CLIENT_URL}/forget-password/${unHashedToken}`
     ),
   });
 
@@ -210,7 +221,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  res.cookie(process.env.JWT_SECRET, "", CookieOptions);
+  console.log("Logout User",req.user);
+  res.cookie(process.env.JWT_NAME, "", CookieOptions);
   res.status(200).json(new ApiResponse(200, {}, "Logged out successfully"));
 });
 

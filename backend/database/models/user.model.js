@@ -11,7 +11,7 @@ const userSchema = new Schema(
   {
     avatar: {
       type: String,
-      default: "/images/placeholder-avatar.png",
+      default: "/images/placeholder-avatar.svg",
     },
     email: {
       type: String,

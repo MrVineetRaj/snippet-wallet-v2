@@ -12,7 +12,7 @@ export const CookieOptions = {
 };
 
 export const corsOptions = {
-  origin: "http://localhost:3000", // Replace with your frontend URL
+  origin: process.env.CLIENT_URL, // Replace with your frontend URL
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 200,

@@ -7,17 +7,17 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
   // Get token from cookies
   const accessToken = req.cookies?.[process.env.JWT_NAME];
 
+  console.log("Access Token: ", accessToken);
   if (!accessToken) {
-    throw new ApiError(404, "Unauthorized Access");
+    throw new ApiError(401, "Unauthorized Access");
   }
 
   const decoded = jwt.decode(accessToken, process.env.JWT_SECRET);
 
+  console.log("Decoded Token: ", decoded.id);
+
   const user = await User.findById(decoded.id);
 
-  if (!user) {
-    throw new ApiError(404, "Unauthorized Access");
-  }
 
   req.user = user;
 
